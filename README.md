@@ -1,39 +1,39 @@
 ![<workflow status>](https://github.com/<<OWNER>>/<<REPOSITORY>>/actions/workflows/<<WORKFLOW_FILE>>/badge.svg)
 
-# <Project Name>
+#<<Project Name>
 
-<Repository Description>   
-   
-## INFO:
+<Repository Description → context>
 
-### Action (jobs):
-   
-<< [![Build](https://github.com/recognizegroup/fiberworkz/actions/workflows/build_test.yaml/badge.svg)](https://github.com/recognizegroup/fiberworkz/actions/workflows/build_test.yaml)
- >>
+##INFO:
 
-   
-## 🚀 Getting Started
+###Action (jobs): 
+
+<< [![Build](GitHub: Where the world builds software <<OWNER>>/<<REPOSITORY>>/actions/workflows/<<WORKFLOW_FILE>>/badge.svg)] >>
+
+##🚀 Getting Started
 
 To get a local copy up and running follow these simple steps.
 
-### Development prerequisites
-   
-      << Define all resources that have to be installed >>
+###Development prerequisites
 
-## :rocket: Getting Started
+<< Define all resources that have to be installed >>
 
-### Installation
+###Installation
 
-<< 
-   Steps To Start the development
-   
-   1. Clone the repository
-      git clone git@github.com:recognizegroup/fiberworkz.git
-   
->>
+<< Steps To Start the development>> 
 
-## :pencil2: Architecture
+eg. 
+Steps To Start the development
+1. Clone the repositorygit clone git@github.com:recognizegroup/<<Project Name>>.git
 
-<< link to the Architecture Chart>> 
-   
-Visit [Lucid](https://lucid.app/lucidchart/769dcab5-46ad-4b67-90be-74c67a4dcc74/edit?invitationId=inv_ba682368-258e-4cd9-91c5-d6ed83470c02) for latest version of the design.
+
+
+##:pencil2: Documentation
+
+###Architecture
+
+Visit << link to the Architecture Chart>> for latest version of the design.
+
+###Relevant Links
+
+Documentation Links (Confluence
