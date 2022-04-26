@@ -1,6 +1,6 @@
 ![<<workflow status>>](https://github.com/<<OWNER>>/<<REPOSITORY>>/actions/workflows/<<WORKFLOW_FILE>>/badge.svg)
 
-# <<Project Name>>
+# <Project Name>
 
 <<Repository Description>>   
    
