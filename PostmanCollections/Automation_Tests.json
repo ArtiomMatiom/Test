@@ -1,0 +1,1926 @@
+{
+	"info": {
+		"_postman_id": "f272e722-2b32-4f73-a0cd-5546e258261b",
+		"name": "Automation Testing",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Tickets",
+			"item": [
+				{
+					"name": "ZSmart",
+					"item": [
+						{
+							"name": "CreateTicket_Test",
+							"item": [
+								{
+									"name": "Act",
+									"item": [
+										{
+											"name": "CreateTicketRequestFromFile",
+											"event": [
+												{
+													"listen": "prerequest",
+													"script": {
+														"id": "0eecf0a2-f808-4017-b86c-501928cbee9b",
+														"exec": [
+															""
+														],
+														"type": "text/javascript"
+													}
+												},
+												{
+													"listen": "test",
+													"script": {
+														"id": "0113a5d8-7fdd-4496-80c4-0c019a7bfa47",
+														"exec": [
+															"pm.test(\"Status code is 200\", function () {\r",
+															"  pm.response.to.have.status(200);\r",
+															"});\r",
+															"\r",
+															"pm.test(\"Status Code should be 0\", function(){\r",
+															"    var xmlTree = xml2Json(responseBody);\r",
+															"    var statusCode = xmlTree[\"soap11:Envelope\"][\"soap11:Body\"][\"res:SubmitGenericProductOrderResponse\"][\"RESULT_STATUS\"][\"STATUS_CODE\"];\r",
+															"    pm.expect(statusCode).to.equal(\"0\")\r",
+															"});\r",
+															"\r",
+															"setTimeout(function(){}, 60000); // Waiting for flow to end"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"id": "aca3eccd-67ff-4302-af53-52170ffe931a",
+											"protocolProfileBehavior": {
+												"disableBodyPruning": true
+											},
+											"request": {
+												"auth": {
+													"type": "basic",
+													"basic": {
+														"username": "{{KpnToVWTApimLogin}}",
+														"password": "{{KpnToVWTApimPassword}}"
+													}
+												},
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{{body}}",
+													"options": {
+														"raw": {
+															"language": "xml"
+														}
+													}
+												},
+												"url": "{{Url_KPN_Incoming}}/Request"
+											},
+											"response": []
+										}
+									],
+									"id": "0d04cddd-b9e2-4c3c-bd09-093b41b26d36",
+									"event": [
+										{
+											"listen": "prerequest",
+											"script": {
+												"id": "2ebb37a5-15f6-45d5-837a-291fdca17715",
+												"type": "text/javascript",
+												"exec": [
+													""
+												]
+											}
+										},
+										{
+											"listen": "test",
+											"script": {
+												"id": "21e269cb-c032-46e5-be21-988ddb1411d8",
+												"type": "text/javascript",
+												"exec": [
+													""
+												]
+											}
+										}
+									]
+								},
+								{
+									"name": "Assert",
+									"item": [
+										{
+											"name": "Check_WorkOrders_Created",
+											"event": [
+												{
+													"listen": "prerequest",
+													"script": {
+														"id": "dc0ab971-4e13-48bb-81d2-1ba765d7d945",
+														"exec": [
+															"const url = \"https://login.microsoftonline.com/be36ab0a-ee39-47de-9356-a8a501a9c832/oauth2/v2.0/token\"\r",
+															"const clientId = pm.environment.get(\"apim_clientId\")\r",
+															"const clientSecret = pm.environment.get(\"apim_clientSecret\")\r",
+															"\r",
+															"const scope = `api://app-vwt-ip-4ps-service-orders-${pm.environment.get(\"environmentName\")}/.default` \r",
+															"\r",
+															"const options = {\r",
+															"  url:  url, \r",
+															"  method: 'POST',\r",
+															"  header: {\r",
+															"    'Accept': '*/*',\r",
+															"    'Content-Type': 'application/x-www-form-urlencoded',\r",
+															"  },\r",
+															"  body: {\r",
+															"    mode: 'urlencoded',\r",
+															"    urlencoded : [\r",
+															"      { key: 'grant_type', value: \"client_credentials\"},\r",
+															"      { key: 'client_id', value: clientId},\r",
+															"      { key: 'client_secret', value: clientSecret},\r",
+															"      { key: 'scope', value: scope}\r",
+															"    ]\r",
+															"  }\r",
+															"};\r",
+															"\r",
+															"pm.sendRequest(options,(error,res)=>{\r",
+															"    pm.variables.set(\"my-fromscript-token\", res.json().access_token);\r",
+															"});\r",
+															""
+														],
+														"type": "text/javascript"
+													}
+												},
+												{
+													"listen": "test",
+													"script": {
+														"id": "0c3be032-9fbf-4f23-99e9-7da749911cf4",
+														"exec": [
+															"pm.test(\"Status code is 200\", function () {\r",
+															"  pm.response.to.have.status(200);\r",
+															"});\r",
+															"\r",
+															"pm.test(\"Only 1 Work Order should have been Created\", ()=>{\r",
+															"    pm.expect( pm.response.json().value.length).to.equal(1)\r",
+															"})\r",
+															"\r",
+															"pm.test(\"All expected work orders should have been created\", ()=>{\r",
+															"    let expectedWorkOrders = pm.variables.get(\"Expected_WorkOrders\");\r",
+															"\r",
+															"    for( var workOrder of expectedWorkOrders)\r",
+															"    {\r",
+															"        var wasExpectedOrderCreated = pm.response.json().value\r",
+															"                                        .some( x=> x.description == workOrder.description \r",
+															"                                                 && x.sourceCompany === workOrder.sourceCompany\r",
+															"                                                 && x.sourceType === workOrder.sourceType\r",
+															"                                                 && x.taskNo === workOrder.taskNo\r",
+															"                                                 && x.taskStatus === workOrder.taskStatus)\r",
+															"        pm.expect(wasExpectedOrderCreated).to.be.true;\r",
+															"    }\r",
+															"})\r",
+															"\r",
+															""
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"id": "2f13cfd2-2fda-4f4d-a826-279541d27b53",
+											"protocolProfileBehavior": {
+												"disableBodyPruning": true
+											},
+											"request": {
+												"auth": {
+													"type": "bearer",
+													"bearer": {
+														"token": "{{my-fromscript-token}}"
+													}
+												},
+												"method": "GET",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": ""
+												},
+												"url": {
+													"raw": "{{ApimEndpoint}}/4ps-service-orders/api/4PS/VWT/v1.0/companies({{CompanyId}})/workOrdersVWT?$filter=sourceNo eq '{{local_createdServiceOrderNo}}' ",
+													"host": [
+														"{{ApimEndpoint}}"
+													],
+													"path": [
+														"4ps-service-orders",
+														"api",
+														"4PS",
+														"VWT",
+														"v1.0",
+														"companies({{CompanyId}})",
+														"workOrdersVWT"
+													],
+													"query": [
+														{
+															"key": "$filter",
+															"value": "sourceNo eq '{{local_createdServiceOrderNo}}' "
+														}
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "Check_LogBooks_Created",
+											"event": [
+												{
+													"listen": "prerequest",
+													"script": {
+														"id": "dc0ab971-4e13-48bb-81d2-1ba765d7d945",
+														"exec": [
+															"const url = \"https://login.microsoftonline.com/be36ab0a-ee39-47de-9356-a8a501a9c832/oauth2/v2.0/token\"\r",
+															"const clientId = pm.environment.get(\"apim_clientId\")\r",
+															"const clientSecret = pm.environment.get(\"apim_clientSecret\")\r",
+															"const scope = `api://app-vwt-ip-4ps-${pm.environment.get(\"environmentName\")}/.default`\r",
+															"\r",
+															"const options = {\r",
+															"  url:  url, \r",
+															"  method: 'POST',\r",
+															"  header: {\r",
+															"    'Accept': '*/*',\r",
+															"    'Content-Type': 'application/x-www-form-urlencoded',\r",
+															"  },\r",
+															"  body: {\r",
+															"    mode: 'urlencoded',\r",
+															"    urlencoded : [\r",
+															"      { key: 'grant_type', value: \"client_credentials\"},\r",
+															"      { key: 'client_id', value: clientId},\r",
+															"      { key: 'client_secret', value: clientSecret},\r",
+															"      { key: 'scope', value: scope}\r",
+															"    ]\r",
+															"  }\r",
+															"};\r",
+															"\r",
+															"pm.sendRequest(options,(error,res)=>{\r",
+															"    pm.variables.set(\"my-fromscript-token\", res.json().access_token);\r",
+															"});\r",
+															""
+														],
+														"type": "text/javascript"
+													}
+												},
+												{
+													"listen": "test",
+													"script": {
+														"id": "0c3be032-9fbf-4f23-99e9-7da749911cf4",
+														"exec": [
+															"pm.test(\"Status code is 200\", function () {\r",
+															"  pm.response.to.have.status(200);\r",
+															"});\r",
+															"\r",
+															"pm.test(\"Correct LogBookTexts Should be created\", ()=>{\r",
+															"    let expectedLogbookTexts = pm.variables.get(\"Expected_LogbookTexts\");\r",
+															"\r",
+															"    for( var logbookText of expectedLogbookTexts)\r",
+															"    {\r",
+															"        var wasExpectedOrderCreated = pm.response.json().value\r",
+															"                                        .some( x=> x.category == logbookText.category \r",
+															"                                              && x.external == logbookText.external\r",
+															"                                              && x.lineNo == logbookText.lineNo)\r",
+															"        pm.expect(wasExpectedOrderCreated).to.be.true;\r",
+															"    }\r",
+															"})\r",
+															"\r",
+															"\r",
+															""
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"id": "bc3b06e8-d94b-4c5d-878b-68ab859b4bd9",
+											"protocolProfileBehavior": {
+												"disableBodyPruning": true
+											},
+											"request": {
+												"auth": {
+													"type": "bearer",
+													"bearer": {
+														"token": "{{my-fromscript-token}}"
+													}
+												},
+												"method": "GET",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": ""
+												},
+												"url": {
+													"raw": "{{ApimEndpoint}}/4ps/api/4PS/VWT/v1.0/companies({{CompanyId}})/complexLogbookTextsVWT?$filter=serviceOrderNo eq '{{local_createdServiceOrderNo}}'",
+													"host": [
+														"{{ApimEndpoint}}"
+													],
+													"path": [
+														"4ps",
+														"api",
+														"4PS",
+														"VWT",
+														"v1.0",
+														"companies({{CompanyId}})",
+														"complexLogbookTextsVWT"
+													],
+													"query": [
+														{
+															"key": "$filter",
+															"value": "serviceOrderNo eq '{{local_createdServiceOrderNo}}'"
+														}
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "Check_ContractFeatureType_Created",
+											"event": [
+												{
+													"listen": "prerequest",
+													"script": {
+														"id": "dc0ab971-4e13-48bb-81d2-1ba765d7d945",
+														"exec": [
+															"const url = \"https://login.microsoftonline.com/be36ab0a-ee39-47de-9356-a8a501a9c832/oauth2/v2.0/token\"\r",
+															"const clientId = pm.environment.get(\"apim_clientId\")\r",
+															"const clientSecret = pm.environment.get(\"apim_clientSecret\")\r",
+															"const scope = `api://app-vwt-ip-4ps-${pm.environment.get(\"environmentName\")}/.default`\r",
+															"\r",
+															"const options = {\r",
+															"  url:  url, \r",
+															"  method: 'POST',\r",
+															"  header: {\r",
+															"    'Accept': '*/*',\r",
+															"    'Content-Type': 'application/x-www-form-urlencoded',\r",
+															"  },\r",
+															"  body: {\r",
+															"    mode: 'urlencoded',\r",
+															"    urlencoded : [\r",
+															"      { key: 'grant_type', value: \"client_credentials\"},\r",
+															"      { key: 'client_id', value: clientId},\r",
+															"      { key: 'client_secret', value: clientSecret},\r",
+															"      { key: 'scope', value: scope}\r",
+															"    ]\r",
+															"  }\r",
+															"};\r",
+															"\r",
+															"pm.sendRequest(options,(error,res)=>{\r",
+															"    pm.variables.set(\"my-fromscript-token\", res.json().access_token);\r",
+															"});\r",
+															""
+														],
+														"type": "text/javascript"
+													}
+												},
+												{
+													"listen": "test",
+													"script": {
+														"id": "0c3be032-9fbf-4f23-99e9-7da749911cf4",
+														"exec": [
+															"pm.test(\"Status code is 200\", function () {\r",
+															"  pm.response.to.have.status(200);\r",
+															"});\r",
+															"\r",
+															"pm.test(\"Contract Feature Types Created\", function () {\r",
+															"     let expectedContractFeatureTypes = pm.variables.get(\"Expected_ContractFeature_Types\");\r",
+															"\r",
+															"    for( var contractFeature of expectedContractFeatureTypes)\r",
+															"    {\r",
+															"        var wasExpectedOrderCreated = pm.response.json().value\r",
+															"                                        .some( x=> x.comments == contractFeature.comments \r",
+															"                                              && x.feature == contractFeature.feature\r",
+															"                                              && x.featureGroup == contractFeature.featureGroup\r",
+															"                                              && x.relationType == contractFeature.relationType)\r",
+															"        pm.expect(wasExpectedOrderCreated).to.be.true;\r",
+															"    }\r",
+															"});\r",
+															""
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"id": "198acd94-7d99-47f2-9d87-8bb338a8ba51",
+											"protocolProfileBehavior": {
+												"disableBodyPruning": true
+											},
+											"request": {
+												"auth": {
+													"type": "bearer",
+													"bearer": {
+														"token": "{{my-fromscript-token}}"
+													}
+												},
+												"method": "GET",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": ""
+												},
+												"url": {
+													"raw": "{{ApimEndpoint}}/4ps/api/4PS/base/v1.0/companies({{CompanyId}})/contactFeatureTypes?$filter=code eq '{{local_createdServiceOrderNo}}' and featureGroup eq 'INTEGRATION'&$orderby=lineNo",
+													"host": [
+														"{{ApimEndpoint}}"
+													],
+													"path": [
+														"4ps",
+														"api",
+														"4PS",
+														"base",
+														"v1.0",
+														"companies({{CompanyId}})",
+														"contactFeatureTypes"
+													],
+													"query": [
+														{
+															"key": "$filter",
+															"value": "code eq '{{local_createdServiceOrderNo}}' and featureGroup eq 'INTEGRATION'"
+														},
+														{
+															"key": "$orderby",
+															"value": "lineNo"
+														}
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "DocumentLink",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"id": "e45c51a2-fb49-496f-8f6e-cb2e1938ea64",
+														"exec": [
+															"pm.test(\"Status code is 200\", function () {\r",
+															"  pm.response.to.have.status(200);\r",
+															"});\r",
+															"\r",
+															"console.log(pm.response);\r",
+															"var HasAttachment = pm.response.json().value.length > 0;\r",
+															"console.log(HasAttachment);\r",
+															"\r",
+															"if (HasAttachment)\r",
+															"{\r",
+															"    const response = pm.response.json();\r",
+															"    const documentNo = response.value[0].documentNo;\r",
+															"    console.log(documentNo);\r",
+															"    pm.variables.set(\"Pre_Expected_documentNo\", documentNo);\r",
+															"    pm.globals.set(\"documentNo\", response.value[0].documentNo);\r",
+															"}\r",
+															"else\r",
+															"{\r",
+															"    console.log(\"else\");\r",
+															"    postman.setNextRequest(\"Delete_ServiceOrder\");  \r",
+															"}"
+														],
+														"type": "text/javascript"
+													}
+												},
+												{
+													"listen": "prerequest",
+													"script": {
+														"id": "29257c46-864f-4f95-bf33-0afe992bf356",
+														"exec": [
+															"const url = \"https://login.microsoftonline.com/be36ab0a-ee39-47de-9356-a8a501a9c832/oauth2/v2.0/token\"\r",
+															"const clientId = pm.environment.get(\"apim_clientId\")\r",
+															"const clientSecret = pm.environment.get(\"apim_clientSecret\")\r",
+															"\r",
+															"\r",
+															"const scope = `api://app-vwt-ip-4ps-documents-${pm.environment.get(\"environmentName\")}/.default`\r",
+															"\r",
+															"const options = {\r",
+															"  url:  url, \r",
+															"  method: 'POST',\r",
+															"  header: {\r",
+															"    'Accept': '*/*',\r",
+															"    'Content-Type': 'application/x-www-form-urlencoded',\r",
+															"  },\r",
+															"  body: {\r",
+															"    mode: 'urlencoded',\r",
+															"    urlencoded : [\r",
+															"      { key: 'grant_type', value: \"client_credentials\"},\r",
+															"      { key: 'client_id', value: clientId},\r",
+															"      { key: 'client_secret', value: clientSecret},\r",
+															"      { key: 'scope', value: scope}\r",
+															"    ]\r",
+															"  }\r",
+															"};\r",
+															"\r",
+															"pm.sendRequest(options,(error,res)=>{\r",
+															"    pm.variables.set(\"my-fromscript-token\", res.json().access_token);\r",
+															"});\r",
+															"\r",
+															"\r",
+															""
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"id": "7d24f69f-708d-4e7a-bc71-da15aa2b71e5",
+											"protocolProfileBehavior": {
+												"disableBodyPruning": true
+											},
+											"request": {
+												"auth": {
+													"type": "bearer",
+													"bearer": {
+														"token": "{{my-fromscript-token}}"
+													}
+												},
+												"method": "GET",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": ""
+												},
+												"url": {
+													"raw": "{{ApimEndpoint}}/4ps-documents/api/4PS/base/v1.0/companies({{CompanyId}})/documentLinks?$filter=recordId eq 'Service Order: {{local_createdServiceOrderNo}}'",
+													"host": [
+														"{{ApimEndpoint}}"
+													],
+													"path": [
+														"4ps-documents",
+														"api",
+														"4PS",
+														"base",
+														"v1.0",
+														"companies({{CompanyId}})",
+														"documentLinks"
+													],
+													"query": [
+														{
+															"key": "$filter",
+															"value": "recordId eq 'Service Order: {{local_createdServiceOrderNo}}'"
+														}
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "Check_Attachment_Created",
+											"event": [
+												{
+													"listen": "prerequest",
+													"script": {
+														"id": "4bdbab10-2a43-4b0c-8b1e-97175397b7dc",
+														"exec": [
+															"const url = \"https://login.microsoftonline.com/be36ab0a-ee39-47de-9356-a8a501a9c832/oauth2/v2.0/token\"\r",
+															"const clientId = pm.environment.get(\"apim_clientId\")\r",
+															"const clientSecret = pm.environment.get(\"apim_clientSecret\")\r",
+															"\r",
+															"\r",
+															"const scope = `api://app-vwt-ip-4ps-documents-${pm.environment.get(\"environmentName\")}/.default`\r",
+															"\r",
+															"const options = {\r",
+															"  url:  url, \r",
+															"  method: 'POST',\r",
+															"  header: {\r",
+															"    'Accept': '*/*',\r",
+															"    'Content-Type': 'application/x-www-form-urlencoded',\r",
+															"  },\r",
+															"  body: {\r",
+															"    mode: 'urlencoded',\r",
+															"    urlencoded : [\r",
+															"      { key: 'grant_type', value: \"client_credentials\"},\r",
+															"      { key: 'client_id', value: clientId},\r",
+															"      { key: 'client_secret', value: clientSecret},\r",
+															"      { key: 'scope', value: scope}\r",
+															"    ]\r",
+															"  }\r",
+															"};\r",
+															"\r",
+															"pm.sendRequest(options,(error,res)=>{\r",
+															"    pm.variables.set(\"my-fromscript-token\", res.json().access_token);\r",
+															"});\r",
+															"\r",
+															"\r",
+															""
+														],
+														"type": "text/javascript"
+													}
+												},
+												{
+													"listen": "test",
+													"script": {
+														"id": "b3bc9337-b812-43de-8a8a-a61296ce796b",
+														"exec": [
+															"pm.test(\"Status code is 200\", function () {\r",
+															"  pm.response.to.have.status(200);\r",
+															"});\r",
+															"\r",
+															"pm.test(\"Correct Attachment Should be created\",()=>{\r",
+															"    let expecteDocumentProperties = pm.variables.get(\"Expected_DocumentProperties\");\r",
+															" \r",
+															"    for( var DocumentProperties of expecteDocumentProperties)\r",
+															"    {\r",
+															"        var wasExpectedOrderCreated = pm.response.json().value\r",
+															"                                        .some( x=> x.description == DocumentProperties.description \r",
+															"                                              && x.documentCategory == DocumentProperties.documentCategory\r",
+															"                                              && x.internalCompany == DocumentProperties.internalCompany)\r",
+															"        pm.expect(wasExpectedOrderCreated).to.be.true;\r",
+															"    }\r",
+															"})\r",
+															"\r",
+															"\r",
+															"\r",
+															"\r",
+															"\r",
+															"\r",
+															""
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"id": "3a31d0af-99bc-4d25-af51-24fd58f86998",
+											"protocolProfileBehavior": {
+												"disableBodyPruning": true
+											},
+											"request": {
+												"auth": {
+													"type": "bearer",
+													"bearer": {
+														"token": "{{my-fromscript-token}}"
+													}
+												},
+												"method": "GET",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": ""
+												},
+												"url": {
+													"raw": "{{ApimEndpoint}}/4ps-documents/api/4PS/base/v1.0/companies({{CompanyId}})/documentProperties?$filter=no eq '{{Pre_Expected_documentNo}}'",
+													"host": [
+														"{{ApimEndpoint}}"
+													],
+													"path": [
+														"4ps-documents",
+														"api",
+														"4PS",
+														"base",
+														"v1.0",
+														"companies({{CompanyId}})",
+														"documentProperties"
+													],
+													"query": [
+														{
+															"key": "$filter",
+															"value": "no eq '{{Pre_Expected_documentNo}}'"
+														}
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "Check_ServiceOrder_Created",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"id": "d94d0687-da62-4144-8d57-5e7229c97093",
+														"exec": [
+															"pm.test(\"Status code is 200\", function () {\r",
+															"  pm.response.to.have.status(200);\r",
+															"});\r",
+															"\r",
+															"pm.test(`Service order Should Exist`, ()=>{\r",
+															"    pm.expect( pm.response.json().value.length).to.greaterThan(0)\r",
+															"})\r",
+															"\r",
+															"pm.test(\"Service order should have Correct Values\", ()=>{\r",
+															"    var serviceOrder = pm.response.json().value[0];\r",
+															"\r",
+															"    //Call 4PS to update service order\r",
+															"    pm.expect(serviceOrder.address).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").address);\r",
+															"    pm.expect(serviceOrder.city).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").city);\r",
+															"    pm.expect(serviceOrder.countryRegionCode).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").countryRegionCode);\r",
+															"    pm.expect(serviceOrder.customerOrderStatus).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").customerOrderStatus);\r",
+															"    pm.expect(serviceOrder.deliveryStatus).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").deliveryStatus);\r",
+															"    pm.expect(serviceOrder.description).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").description);\r",
+															"    pm.expect(serviceOrder.description2).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").description2);\r",
+															"    pm.expect(serviceOrder.eMail).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").eMail);\r",
+															"    pm.expect(serviceOrder.endingDateAppointment).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").endingDateAppointment);\r",
+															"    pm.expect(serviceOrder.endingTimeAppointment).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").endingTimeAppointment);\r",
+															"    pm.expect(serviceOrder.finalDeliveryDate).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").finalDeliveryDate);\r",
+															"    pm.expect(serviceOrder.finalDeliveryTime).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").finalDeliveryTime);\r",
+															"    pm.expect(serviceOrder.mobilePhoneNo).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").mobilePhoneNo);\r",
+															"    pm.expect(serviceOrder.onHold).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").onHold);\r",
+															"    pm.expect(serviceOrder.orderKind).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").orderKind);\r",
+															"    pm.expect(serviceOrder.orderType).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").orderType);\r",
+															"    pm.expect(serviceOrder.phoneNo).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").phoneNo);\r",
+															"    pm.expect(serviceOrder.planType).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").planType);\r",
+															"    pm.expect(serviceOrder.postCode).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").postCode);\r",
+															"    pm.expect(serviceOrder.startingDateAppointment).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").startingDateAppointment);\r",
+															"    pm.expect(serviceOrder.startingTimeAppointment).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").startingTimeAppointment);\r",
+															"    pm.expect(serviceOrder.appointmentBeforeDate).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").appointmentBeforeDate);\r",
+															"    //add by reinoud\r",
+															"    pm.expect(serviceOrder.name).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").name);\r",
+															"    pm.expect(serviceOrder.orderNoCustomer).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").orderNoCustomer);\r",
+															"    pm.expect(serviceOrder.status).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").status);\r",
+															"\r",
+															"    //Call 4PS to update service order with service location\r",
+															"    pm.expect(serviceOrder.serviceLocationNo).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").serviceLocationNo);\r",
+															"\r",
+															"    //Call 4PS to update service order with customer and contract information\r",
+															"    pm.expect(serviceOrder.customerNo).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").customerNo);\r",
+															"    pm.expect(serviceOrder.priority).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").priority);\r",
+															"    pm.expect(serviceOrder.serviceContractNo).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").serviceContractNo);\r",
+															"})\r",
+															"\r",
+															"\r",
+															"pm.variables.set(\"local_createdServiceOrderSystemId\",pm.response.json().value[0].systemId);\r",
+															"pm.variables.set(\"local_createdServiceOrderNo\",pm.response.json().value[0].no);\r",
+															"\r",
+															"\r",
+															"\r",
+															"\r",
+															""
+														],
+														"type": "text/javascript"
+													}
+												},
+												{
+													"listen": "prerequest",
+													"script": {
+														"id": "34838c53-0874-4dde-8a56-ca5491457f0f",
+														"exec": [
+															"const url = \"https://login.microsoftonline.com/be36ab0a-ee39-47de-9356-a8a501a9c832/oauth2/v2.0/token\"\r",
+															"const clientId = pm.environment.get(\"apim_clientId\")\r",
+															"const clientSecret = pm.environment.get(\"apim_clientSecret\")\r",
+															"\r",
+															"\r",
+															"\r",
+															"const scope = `api://app-vwt-ip-4ps-service-orders-${pm.environment.get(\"environmentName\")}/.default` \r",
+															"\r",
+															"const options = {\r",
+															"  url:  url, \r",
+															"  method: 'POST',\r",
+															"  header: {\r",
+															"    'Accept': '*/*',\r",
+															"    'Content-Type': 'application/x-www-form-urlencoded',\r",
+															"  },\r",
+															"  body: {\r",
+															"    mode: 'urlencoded',\r",
+															"    urlencoded : [\r",
+															"      { key: 'grant_type', value: \"client_credentials\"},\r",
+															"      { key: 'client_id', value: clientId},\r",
+															"      { key: 'client_secret', value: clientSecret},\r",
+															"      { key: 'scope', value: scope}\r",
+															"    ]\r",
+															"  }\r",
+															"};\r",
+															"\r",
+															"\r",
+															"//Seting variables to be used in the URL\r",
+															"pm.variables.set(\"Pre_Expected_Integration\", pm.variables.get(\"Expected_ServiceOrder\").integration)\r",
+															"pm.variables.set(\"Pre_Expected_OrderNoCustomer\", pm.variables.get(\"Expected_ServiceOrder\").orderNoCustomer)\r",
+															"\r",
+															"pm.sendRequest(options,(error,res)=>{\r",
+															"    pm.variables.set(\"my-fromscript-token\", res.json().access_token);\r",
+															"});\r",
+															"\r",
+															""
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"id": "c5d57658-1ae2-46d6-8eff-b379d10e0e51",
+											"protocolProfileBehavior": {
+												"disableBodyPruning": true
+											},
+											"request": {
+												"auth": {
+													"type": "bearer",
+													"bearer": {
+														"token": "{{my-fromscript-token}}"
+													}
+												},
+												"method": "GET",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": ""
+												},
+												"url": {
+													"raw": "{{ApimEndpoint}}/4ps-service-orders/ODataV4/Company('{{CompanyId}}')/serviceOrderVWT?$filter=integration eq '{{Pre_Expected_Integration}}' and orderNoCustomer eq '{{Pre_Expected_OrderNoCustomer}}'",
+													"host": [
+														"{{ApimEndpoint}}"
+													],
+													"path": [
+														"4ps-service-orders",
+														"ODataV4",
+														"Company('{{CompanyId}}')",
+														"serviceOrderVWT"
+													],
+													"query": [
+														{
+															"key": "$filter",
+															"value": "integration eq '{{Pre_Expected_Integration}}' and orderNoCustomer eq '{{Pre_Expected_OrderNoCustomer}}'"
+														}
+													]
+												}
+											},
+											"response": []
+										}
+									],
+									"id": "ab2f5cfd-3a07-4b2f-b907-f356af7af1a9"
+								},
+								{
+									"name": "Cleanup",
+									"item": [
+										{
+											"name": "Delete_ServiceOrder",
+											"item": [
+												{
+													"name": "Cancel_Service_Order",
+													"event": [
+														{
+															"listen": "prerequest",
+															"script": {
+																"id": "dc0ab971-4e13-48bb-81d2-1ba765d7d945",
+																"exec": [
+																	"const url = \"https://login.microsoftonline.com/be36ab0a-ee39-47de-9356-a8a501a9c832/oauth2/v2.0/token\"\r",
+																	"const clientId = pm.environment.get(\"apim_clientId\")\r",
+																	"const clientSecret = pm.environment.get(\"apim_clientSecret\")\r",
+																	"const scope = `api://app-vwt-ip-4ps-service-orders-${pm.environment.get(\"environmentName\")}/.default`\r",
+																	"\r",
+																	"const getBearerTokenOptions = {\r",
+																	"  url:  url, \r",
+																	"  method: 'POST',\r",
+																	"  header: {\r",
+																	"    'Accept': '*/*',\r",
+																	"    'Content-Type': 'application/x-www-form-urlencoded',\r",
+																	"  },\r",
+																	"  body: {\r",
+																	"    mode: 'urlencoded',\r",
+																	"    urlencoded : [\r",
+																	"      { key: 'grant_type', value: \"client_credentials\"},\r",
+																	"      { key: 'client_id', value: clientId},\r",
+																	"      { key: 'client_secret', value: clientSecret},\r",
+																	"      { key: 'scope', value: scope}\r",
+																	"    ]\r",
+																	"  }\r",
+																	"};\r",
+																	"\r",
+																	"pm.sendRequest(getBearerTokenOptions,(error,res)=>{\r",
+																	"    pm.variables.set(\"my-fromscript-token\", res.json().access_token);\r",
+																	"});\r",
+																	""
+																],
+																"type": "text/javascript"
+															}
+														},
+														{
+															"listen": "test",
+															"script": {
+																"id": "0c3be032-9fbf-4f23-99e9-7da749911cf4",
+																"exec": [
+																	"pm.test(\"Status code is 200\", function () {\r",
+																	"  pm.response.to.have.status(200);\r",
+																	"});"
+																],
+																"type": "text/javascript"
+															}
+														}
+													],
+													"id": "a05d1f68-6194-4351-a910-24e75bf119b9",
+													"protocolProfileBehavior": {
+														"disableBodyPruning": true
+													},
+													"request": {
+														"auth": {
+															"type": "bearer",
+															"bearer": {
+																"token": "{{my-fromscript-token}}"
+															}
+														},
+														"method": "PATCH",
+														"header": [
+															{
+																"key": "If-Match",
+																"value": "*",
+																"type": "text"
+															}
+														],
+														"body": {
+															"mode": "raw",
+															"raw": "{\r\n    \"status\": \"Cancelled\"\r\n}",
+															"options": {
+																"raw": {
+																	"language": "json"
+																}
+															}
+														},
+														"url": "{{ApimEndpoint}}/4ps-service-orders/ODataV4/Company('{{CompanyId}}')/serviceOrderVWT('{{local_createdServiceOrderNo}}')"
+													},
+													"response": []
+												},
+												{
+													"name": "Delete_WorkOrder",
+													"event": [
+														{
+															"listen": "prerequest",
+															"script": {
+																"id": "dc0ab971-4e13-48bb-81d2-1ba765d7d945",
+																"exec": [
+																	"const url = \"https://login.microsoftonline.com/be36ab0a-ee39-47de-9356-a8a501a9c832/oauth2/v2.0/token\"\r",
+																	"const clientId = pm.environment.get(\"apim_clientId\")\r",
+																	"const clientSecret = pm.environment.get(\"apim_clientSecret\")\r",
+																	"const scope = `api://app-vwt-ip-4ps-service-orders-${pm.environment.get(\"environmentName\")}/.default`\r",
+																	"\r",
+																	"const getBearerTokenOptions = {\r",
+																	"  url:  url, \r",
+																	"  method: 'POST',\r",
+																	"  header: {\r",
+																	"    'Accept': '*/*',\r",
+																	"    'Content-Type': 'application/x-www-form-urlencoded',\r",
+																	"  },\r",
+																	"  body: {\r",
+																	"    mode: 'urlencoded',\r",
+																	"    urlencoded : [\r",
+																	"      { key: 'grant_type', value: \"client_credentials\"},\r",
+																	"      { key: 'client_id', value: clientId},\r",
+																	"      { key: 'client_secret', value: clientSecret},\r",
+																	"      { key: 'scope', value: scope}\r",
+																	"    ]\r",
+																	"  }\r",
+																	"};\r",
+																	"\r",
+																	"pm.sendRequest(getBearerTokenOptions,(error,res)=>{\r",
+																	"    pm.variables.set(\"my-fromscript-token\", res.json().access_token);\r",
+																	"});"
+																],
+																"type": "text/javascript"
+															}
+														},
+														{
+															"listen": "test",
+															"script": {
+																"id": "0c3be032-9fbf-4f23-99e9-7da749911cf4",
+																"exec": [
+																	"pm.test(\"Status code is 204\", function () {\r",
+																	"  pm.response.to.have.status(204);\r",
+																	"});"
+																],
+																"type": "text/javascript"
+															}
+														}
+													],
+													"id": "3a34598f-5c87-492b-9711-b11ea20f4842",
+													"protocolProfileBehavior": {
+														"disableBodyPruning": true
+													},
+													"request": {
+														"auth": {
+															"type": "bearer",
+															"bearer": {
+																"token": "{{my-fromscript-token}}"
+															}
+														},
+														"method": "DELETE",
+														"header": [],
+														"body": {
+															"mode": "raw",
+															"raw": ""
+														},
+														"url": "{{ApimEndpoint}}/4ps-service-orders/ODataV4/Company('{{CompanyId}}')/serviceOrderVWT('{{local_createdServiceOrderNo}}')"
+													},
+													"response": []
+												}
+											],
+											"id": "66acb3a6-aa0a-45cd-82c5-41bd979e7264"
+										}
+									],
+									"id": "5ed1fe06-0aa9-430c-a596-73c8382c1eee",
+									"event": [
+										{
+											"listen": "prerequest",
+											"script": {
+												"id": "a91fa086-0f1d-4460-8293-5e0db0ed6811",
+												"type": "text/javascript",
+												"exec": [
+													""
+												]
+											}
+										},
+										{
+											"listen": "test",
+											"script": {
+												"id": "ae37940d-d785-4c6b-bf37-f2ffd6b16900",
+												"type": "text/javascript",
+												"exec": [
+													"console.log(\"cleanup\")"
+												]
+											}
+										}
+									]
+								}
+							],
+							"id": "0512ce1b-65cc-4ce9-9160-b46a6ad34c53",
+							"description": "This folder describes tests to validate that a create request was processed succesfully",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "4f135dc7-a4cb-4e55-b3ab-5ef5bca7bd6d",
+										"type": "text/javascript",
+										"exec": [
+											"var FileName = pm.variables.get(\"FileURL\") //Comming from DataSetFile",
+											"var SasToken = pm.variables.get(\"TestsBlobSaS\")",
+											"",
+											"var TestFileURL = `${FileName}?${SasToken}`",
+											"",
+											"pm.sendRequest({",
+											"    url: TestFileURL,",
+											"    method: 'GET',",
+											"}, function (err, res) {",
+											"    //BaseX64 decode",
+											"    var testFileContent = res.json();",
+											"    pm.variables.set('body', atob(testFileContent.Request));",
+											"",
+											"    // Loop Through all expected entries",
+											"    for (const [entryName, entryValue] of Object.entries(testFileContent.ExpectedEntries)) ",
+											"    {",
+											"        pm.variables.set(`Expected_${entryName}`, entryValue)",
+											"    }",
+											"",
+											"    for (const [entryName, entryValue] of Object.entries(testFileContent.Env)) ",
+											"    {",
+											"        pm.variables.set(entryName, entryValue);",
+											"    }",
+											"});"
+										]
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"id": "f65789b5-f7b1-4e68-bc66-1fe0ea1b9d93",
+										"type": "text/javascript",
+										"exec": [
+											""
+										]
+									}
+								}
+							]
+						}
+					],
+					"id": "95e47b15-151b-44a5-bf6a-433979e911c0"
+				},
+				{
+					"name": "ServiceNow",
+					"item": [
+						{
+							"name": "CreateTicket_Test",
+							"item": [
+								{
+									"name": "Act",
+									"item": [
+										{
+											"name": "CreateTicketRequestFromFile",
+											"event": [
+												{
+													"listen": "prerequest",
+													"script": {
+														"id": "0eecf0a2-f808-4017-b86c-501928cbee9b",
+														"exec": [
+															""
+														],
+														"type": "text/javascript"
+													}
+												},
+												{
+													"listen": "test",
+													"script": {
+														"id": "0113a5d8-7fdd-4496-80c4-0c019a7bfa47",
+														"exec": [
+															"pm.test(\"Status code is 200\", function () {\r",
+															"  pm.response.to.have.status(200);\r",
+															"});\r",
+															"\r",
+															"setTimeout(function(){}, 60000); // Waiting for flow to end"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"id": "49358253-0d31-4750-a3a7-559467ed6b11",
+											"protocolProfileBehavior": {
+												"disableBodyPruning": true
+											},
+											"request": {
+												"auth": {
+													"type": "basic",
+													"basic": {
+														"password": "{{ServiceNowVWTAPIMPassword}}",
+														"username": "{{ServiceNowVWTAPIMLogin}}"
+													}
+												},
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{{body}}",
+													"options": {
+														"raw": {
+															"language": "xml"
+														}
+													}
+												},
+												"url": "{{Url_KPN_Incoming}}/servicenow"
+											},
+											"response": []
+										}
+									],
+									"id": "f35f07cc-8808-4d11-9efb-117362e0be94",
+									"event": [
+										{
+											"listen": "prerequest",
+											"script": {
+												"id": "2ebb37a5-15f6-45d5-837a-291fdca17715",
+												"type": "text/javascript",
+												"exec": [
+													""
+												]
+											}
+										},
+										{
+											"listen": "test",
+											"script": {
+												"id": "21e269cb-c032-46e5-be21-988ddb1411d8",
+												"type": "text/javascript",
+												"exec": [
+													""
+												]
+											}
+										}
+									]
+								},
+								{
+									"name": "Assert",
+									"item": [
+										{
+											"name": "Check_ServiceOrder_Created",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"id": "d94d0687-da62-4144-8d57-5e7229c97093",
+														"exec": [
+															"pm.test(\"Status code is 200\", function () {\r",
+															"  pm.response.to.have.status(200);\r",
+															"});\r",
+															"\r",
+															"pm.test(`Service order Should Exist`, ()=>{\r",
+															"    pm.expect( pm.response.json().value.length).to.greaterThan(0)\r",
+															"})\r",
+															"\r",
+															"pm.test(\"Service order should have Correct Values\", ()=>{\r",
+															"    var serviceOrder = pm.response.json().value[0];\r",
+															"\r",
+															"    //Call 4PS to update service order\r",
+															"    pm.expect(serviceOrder.address).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").address);\r",
+															"    pm.expect(serviceOrder.city).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").city);\r",
+															"    pm.expect(serviceOrder.countryRegionCode).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").countryRegionCode);\r",
+															"    pm.expect(serviceOrder.customerOrderStatus).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").customerOrderStatus);\r",
+															"    pm.expect(serviceOrder.deliveryStatus).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").deliveryStatus);\r",
+															"    pm.expect(serviceOrder.description).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").description);\r",
+															"    pm.expect(serviceOrder.description2).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").description2);\r",
+															"    pm.expect(serviceOrder.eMail).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").eMail);\r",
+															"    pm.expect(serviceOrder.endingDateAppointment).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").endingDateAppointment);\r",
+															"    pm.expect(serviceOrder.endingTimeAppointment).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").endingTimeAppointment);\r",
+															"    pm.expect(serviceOrder.finalDeliveryDate).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").finalDeliveryDate);\r",
+															"    pm.expect(serviceOrder.finalDeliveryTime).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").finalDeliveryTime);\r",
+															"    pm.expect(serviceOrder.mobilePhoneNo).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").mobilePhoneNo);\r",
+															"    pm.expect(serviceOrder.onHold).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").onHold);\r",
+															"    pm.expect(serviceOrder.orderKind).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").orderKind);\r",
+															"    pm.expect(serviceOrder.orderType).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").orderType);\r",
+															"    pm.expect(serviceOrder.phoneNo).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").phoneNo);\r",
+															"    pm.expect(serviceOrder.planType).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").planType);\r",
+															"    pm.expect(serviceOrder.postCode).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").postCode);\r",
+															"    pm.expect(serviceOrder.startingDateAppointment).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").startingDateAppointment);\r",
+															"    pm.expect(serviceOrder.startingTimeAppointment).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").startingTimeAppointment);\r",
+															"    pm.expect(serviceOrder.appointmentBeforeDate).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").appointmentBeforeDate);\r",
+															"    //add by reinoud\r",
+															"    pm.expect(serviceOrder.name).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").name);\r",
+															"    pm.expect(serviceOrder.orderNoCustomer).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").orderNoCustomer);\r",
+															"    pm.expect(serviceOrder.status).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").status);\r",
+															"\r",
+															"    //Call 4PS to update service order with service location\r",
+															"    pm.expect(serviceOrder.serviceLocationNo).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").serviceLocationNo);\r",
+															"\r",
+															"    //Call 4PS to update service order with customer and contract information\r",
+															"    pm.expect(serviceOrder.customerNo).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").customerNo);\r",
+															"    pm.expect(serviceOrder.priority).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").priority);\r",
+															"    pm.expect(serviceOrder.serviceContractNo).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").serviceContractNo);\r",
+															"})\r",
+															"\r",
+															"\r",
+															"pm.variables.set(\"local_createdServiceOrderSystemId\",pm.response.json().value[0].systemId);\r",
+															"pm.variables.set(\"local_createdServiceOrderNo\",pm.response.json().value[0].no);\r",
+															"\r",
+															"\r",
+															"\r",
+															"\r",
+															""
+														],
+														"type": "text/javascript"
+													}
+												},
+												{
+													"listen": "prerequest",
+													"script": {
+														"id": "34838c53-0874-4dde-8a56-ca5491457f0f",
+														"exec": [
+															"const url = \"https://login.microsoftonline.com/be36ab0a-ee39-47de-9356-a8a501a9c832/oauth2/v2.0/token\"\r",
+															"const clientId = pm.environment.get(\"apim_clientId\")\r",
+															"const clientSecret = pm.environment.get(\"apim_clientSecret\")\r",
+															"\r",
+															"\r",
+															"\r",
+															"const scope = `api://app-vwt-ip-4ps-service-orders-${pm.environment.get(\"environmentName\")}/.default` \r",
+															"\r",
+															"const options = {\r",
+															"  url:  url, \r",
+															"  method: 'POST',\r",
+															"  header: {\r",
+															"    'Accept': '*/*',\r",
+															"    'Content-Type': 'application/x-www-form-urlencoded',\r",
+															"  },\r",
+															"  body: {\r",
+															"    mode: 'urlencoded',\r",
+															"    urlencoded : [\r",
+															"      { key: 'grant_type', value: \"client_credentials\"},\r",
+															"      { key: 'client_id', value: clientId},\r",
+															"      { key: 'client_secret', value: clientSecret},\r",
+															"      { key: 'scope', value: scope}\r",
+															"    ]\r",
+															"  }\r",
+															"};\r",
+															"\r",
+															"\r",
+															"//Seting variables to be used in the URL\r",
+															"pm.variables.set(\"Pre_Expected_Integration\", pm.variables.get(\"Expected_ServiceOrder\").integration)\r",
+															"pm.variables.set(\"Pre_Expected_OrderNoCustomer\", pm.variables.get(\"Expected_ServiceOrder\").orderNoCustomer)\r",
+															"\r",
+															"pm.sendRequest(options,(error,res)=>{\r",
+															"    pm.variables.set(\"my-fromscript-token\", res.json().access_token);\r",
+															"});\r",
+															"\r",
+															""
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"id": "82d2b898-7b8b-4aeb-bd69-4ef13a5b17c0",
+											"protocolProfileBehavior": {
+												"disableBodyPruning": true
+											},
+											"request": {
+												"auth": {
+													"type": "bearer",
+													"bearer": {
+														"token": "{{my-fromscript-token}}"
+													}
+												},
+												"method": "GET",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": ""
+												},
+												"url": {
+													"raw": "{{ApimEndpoint}}/4ps-service-orders/ODataV4/Company('{{CompanyId}}')/serviceOrderVWT?$filter=integration eq '{{Pre_Expected_Integration}}' and orderNoCustomer eq '{{Pre_Expected_OrderNoCustomer}}'",
+													"host": [
+														"{{ApimEndpoint}}"
+													],
+													"path": [
+														"4ps-service-orders",
+														"ODataV4",
+														"Company('{{CompanyId}}')",
+														"serviceOrderVWT"
+													],
+													"query": [
+														{
+															"key": "$filter",
+															"value": "integration eq '{{Pre_Expected_Integration}}' and orderNoCustomer eq '{{Pre_Expected_OrderNoCustomer}}'"
+														}
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "Check_WorkOrders_Created",
+											"event": [
+												{
+													"listen": "prerequest",
+													"script": {
+														"id": "dc0ab971-4e13-48bb-81d2-1ba765d7d945",
+														"exec": [
+															"const url = \"https://login.microsoftonline.com/be36ab0a-ee39-47de-9356-a8a501a9c832/oauth2/v2.0/token\"\r",
+															"const clientId = pm.environment.get(\"apim_clientId\")\r",
+															"const clientSecret = pm.environment.get(\"apim_clientSecret\")\r",
+															"\r",
+															"const scope = `api://app-vwt-ip-4ps-service-orders-${pm.environment.get(\"environmentName\")}/.default` \r",
+															"\r",
+															"const options = {\r",
+															"  url:  url, \r",
+															"  method: 'POST',\r",
+															"  header: {\r",
+															"    'Accept': '*/*',\r",
+															"    'Content-Type': 'application/x-www-form-urlencoded',\r",
+															"  },\r",
+															"  body: {\r",
+															"    mode: 'urlencoded',\r",
+															"    urlencoded : [\r",
+															"      { key: 'grant_type', value: \"client_credentials\"},\r",
+															"      { key: 'client_id', value: clientId},\r",
+															"      { key: 'client_secret', value: clientSecret},\r",
+															"      { key: 'scope', value: scope}\r",
+															"    ]\r",
+															"  }\r",
+															"};\r",
+															"\r",
+															"pm.sendRequest(options,(error,res)=>{\r",
+															"    pm.variables.set(\"my-fromscript-token\", res.json().access_token);\r",
+															"});\r",
+															""
+														],
+														"type": "text/javascript"
+													}
+												},
+												{
+													"listen": "test",
+													"script": {
+														"id": "0c3be032-9fbf-4f23-99e9-7da749911cf4",
+														"exec": [
+															"pm.test(\"Status code is 200\", function () {\r",
+															"  pm.response.to.have.status(200);\r",
+															"});\r",
+															"\r",
+															"pm.test(\"Only 1 Work Order should have been Created\", ()=>{\r",
+															"    pm.expect( pm.response.json().value.length).to.equal(1)\r",
+															"})\r",
+															"\r",
+															"pm.test(\"All expected work orders should have been created\", ()=>{\r",
+															"    let expectedWorkOrders = pm.variables.get(\"Expected_WorkOrders\");\r",
+															"\r",
+															"    for( var workOrder of expectedWorkOrders)\r",
+															"    {\r",
+															"        var wasExpectedOrderCreated = pm.response.json().value\r",
+															"                                        .some( x=> x.description == workOrder.description \r",
+															"                                                 && x.sourceCompany === workOrder.sourceCompany\r",
+															"                                                 && x.sourceType === workOrder.sourceType\r",
+															"                                                 && x.taskNo === workOrder.taskNo\r",
+															"                                                 && x.taskStatus === workOrder.taskStatus)\r",
+															"        pm.expect(wasExpectedOrderCreated).to.be.true;\r",
+															"    }\r",
+															"})\r",
+															"\r",
+															""
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"id": "65edfee4-54d7-411a-9168-2f6e96b2a868",
+											"protocolProfileBehavior": {
+												"disableBodyPruning": true
+											},
+											"request": {
+												"auth": {
+													"type": "bearer",
+													"bearer": {
+														"token": "{{my-fromscript-token}}"
+													}
+												},
+												"method": "GET",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": ""
+												},
+												"url": {
+													"raw": "{{ApimEndpoint}}/4ps-service-orders/api/4PS/VWT/v1.0/companies({{CompanyId}})/workOrdersVWT?$filter=sourceNo eq '{{local_createdServiceOrderNo}}' ",
+													"host": [
+														"{{ApimEndpoint}}"
+													],
+													"path": [
+														"4ps-service-orders",
+														"api",
+														"4PS",
+														"VWT",
+														"v1.0",
+														"companies({{CompanyId}})",
+														"workOrdersVWT"
+													],
+													"query": [
+														{
+															"key": "$filter",
+															"value": "sourceNo eq '{{local_createdServiceOrderNo}}' "
+														}
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "Check_LogBooks_Created",
+											"event": [
+												{
+													"listen": "prerequest",
+													"script": {
+														"id": "dc0ab971-4e13-48bb-81d2-1ba765d7d945",
+														"exec": [
+															"const url = \"https://login.microsoftonline.com/be36ab0a-ee39-47de-9356-a8a501a9c832/oauth2/v2.0/token\"\r",
+															"const clientId = pm.environment.get(\"apim_clientId\")\r",
+															"const clientSecret = pm.environment.get(\"apim_clientSecret\")\r",
+															"const scope = `api://app-vwt-ip-4ps-${pm.environment.get(\"environmentName\")}/.default`\r",
+															"\r",
+															"const options = {\r",
+															"  url:  url, \r",
+															"  method: 'POST',\r",
+															"  header: {\r",
+															"    'Accept': '*/*',\r",
+															"    'Content-Type': 'application/x-www-form-urlencoded',\r",
+															"  },\r",
+															"  body: {\r",
+															"    mode: 'urlencoded',\r",
+															"    urlencoded : [\r",
+															"      { key: 'grant_type', value: \"client_credentials\"},\r",
+															"      { key: 'client_id', value: clientId},\r",
+															"      { key: 'client_secret', value: clientSecret},\r",
+															"      { key: 'scope', value: scope}\r",
+															"    ]\r",
+															"  }\r",
+															"};\r",
+															"\r",
+															"pm.sendRequest(options,(error,res)=>{\r",
+															"    pm.variables.set(\"my-fromscript-token\", res.json().access_token);\r",
+															"});\r",
+															""
+														],
+														"type": "text/javascript"
+													}
+												},
+												{
+													"listen": "test",
+													"script": {
+														"id": "0c3be032-9fbf-4f23-99e9-7da749911cf4",
+														"exec": [
+															"pm.test(\"Status code is 200\", function () {\r",
+															"  pm.response.to.have.status(200);\r",
+															"});\r",
+															"\r",
+															"pm.test(\"Correct LogBookTexts Should be created\", ()=>{\r",
+															"    let expectedLogbookTexts = pm.variables.get(\"Expected_LogbookTexts\");\r",
+															"\r",
+															"    for( var logbookText of expectedLogbookTexts)\r",
+															"    {\r",
+															"        var wasExpectedOrderCreated = pm.response.json().value\r",
+															"                                        .some( x=> x.category == logbookText.category \r",
+															"                                              && x.external == logbookText.external\r",
+															"                                              && x.lineNo == logbookText.lineNo)\r",
+															"        pm.expect(wasExpectedOrderCreated).to.be.true;\r",
+															"    }\r",
+															"})\r",
+															"\r",
+															"\r",
+															""
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"id": "c2b39daa-4ef4-47b2-b9e7-067e93fedb25",
+											"protocolProfileBehavior": {
+												"disableBodyPruning": true
+											},
+											"request": {
+												"auth": {
+													"type": "bearer",
+													"bearer": {
+														"token": "{{my-fromscript-token}}"
+													}
+												},
+												"method": "GET",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": ""
+												},
+												"url": {
+													"raw": "{{ApimEndpoint}}/4ps/api/4PS/VWT/v1.0/companies({{CompanyId}})/complexLogbookTextsVWT?$filter=serviceOrderNo eq '{{local_createdServiceOrderNo}}'",
+													"host": [
+														"{{ApimEndpoint}}"
+													],
+													"path": [
+														"4ps",
+														"api",
+														"4PS",
+														"VWT",
+														"v1.0",
+														"companies({{CompanyId}})",
+														"complexLogbookTextsVWT"
+													],
+													"query": [
+														{
+															"key": "$filter",
+															"value": "serviceOrderNo eq '{{local_createdServiceOrderNo}}'"
+														}
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "Check_ContractFeatureType_Created",
+											"event": [
+												{
+													"listen": "prerequest",
+													"script": {
+														"id": "dc0ab971-4e13-48bb-81d2-1ba765d7d945",
+														"exec": [
+															"const url = \"https://login.microsoftonline.com/be36ab0a-ee39-47de-9356-a8a501a9c832/oauth2/v2.0/token\"\r",
+															"const clientId = pm.environment.get(\"apim_clientId\")\r",
+															"const clientSecret = pm.environment.get(\"apim_clientSecret\")\r",
+															"const scope = `api://app-vwt-ip-4ps-${pm.environment.get(\"environmentName\")}/.default`\r",
+															"\r",
+															"const options = {\r",
+															"  url:  url, \r",
+															"  method: 'POST',\r",
+															"  header: {\r",
+															"    'Accept': '*/*',\r",
+															"    'Content-Type': 'application/x-www-form-urlencoded',\r",
+															"  },\r",
+															"  body: {\r",
+															"    mode: 'urlencoded',\r",
+															"    urlencoded : [\r",
+															"      { key: 'grant_type', value: \"client_credentials\"},\r",
+															"      { key: 'client_id', value: clientId},\r",
+															"      { key: 'client_secret', value: clientSecret},\r",
+															"      { key: 'scope', value: scope}\r",
+															"    ]\r",
+															"  }\r",
+															"};\r",
+															"\r",
+															"pm.sendRequest(options,(error,res)=>{\r",
+															"    pm.variables.set(\"my-fromscript-token\", res.json().access_token);\r",
+															"});\r",
+															""
+														],
+														"type": "text/javascript"
+													}
+												},
+												{
+													"listen": "test",
+													"script": {
+														"id": "0c3be032-9fbf-4f23-99e9-7da749911cf4",
+														"exec": [
+															"pm.test(\"Status code is 200\", function () {\r",
+															"  pm.response.to.have.status(200);\r",
+															"});\r",
+															"\r",
+															"pm.test(\"Contract Feature Types Created\", function () {\r",
+															"     let expectedContractFeatureTypes = pm.variables.get(\"Expected_ContractFeature_Types\");\r",
+															"\r",
+															"    for( var contractFeature of expectedContractFeatureTypes)\r",
+															"    {\r",
+															"        var wasExpectedOrderCreated = pm.response.json().value\r",
+															"                                        .some( x=> x.comments == contractFeature.comments \r",
+															"                                              && x.feature == contractFeature.feature\r",
+															"                                              && x.featureGroup == contractFeature.featureGroup\r",
+															"                                              && x.relationType == contractFeature.relationType)\r",
+															"        pm.expect(wasExpectedOrderCreated).to.be.true;\r",
+															"    }\r",
+															"});\r",
+															""
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"id": "b7bf45e5-0798-4364-9901-bcf6203c4cb2",
+											"protocolProfileBehavior": {
+												"disableBodyPruning": true
+											},
+											"request": {
+												"auth": {
+													"type": "bearer",
+													"bearer": {
+														"token": "{{my-fromscript-token}}"
+													}
+												},
+												"method": "GET",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": ""
+												},
+												"url": {
+													"raw": "{{ApimEndpoint}}/4ps/api/4PS/base/v1.0/companies({{CompanyId}})/contactFeatureTypes?$filter=code eq '{{local_createdServiceOrderNo}}' and featureGroup eq 'INTEGRATION'&$orderby=lineNo",
+													"host": [
+														"{{ApimEndpoint}}"
+													],
+													"path": [
+														"4ps",
+														"api",
+														"4PS",
+														"base",
+														"v1.0",
+														"companies({{CompanyId}})",
+														"contactFeatureTypes"
+													],
+													"query": [
+														{
+															"key": "$filter",
+															"value": "code eq '{{local_createdServiceOrderNo}}' and featureGroup eq 'INTEGRATION'"
+														},
+														{
+															"key": "$orderby",
+															"value": "lineNo"
+														}
+													]
+												}
+											},
+											"response": []
+										}
+									],
+									"id": "8de28b4b-880a-43c0-a559-35b5ab6ca700"
+								},
+								{
+									"name": "Cleanup",
+									"item": [
+										{
+											"name": "Delete_ServiceOrder",
+											"item": [
+												{
+													"name": "Cancel_Service_Order",
+													"event": [
+														{
+															"listen": "prerequest",
+															"script": {
+																"id": "dc0ab971-4e13-48bb-81d2-1ba765d7d945",
+																"exec": [
+																	"const url = \"https://login.microsoftonline.com/be36ab0a-ee39-47de-9356-a8a501a9c832/oauth2/v2.0/token\"\r",
+																	"const clientId = pm.environment.get(\"apim_clientId\")\r",
+																	"const clientSecret = pm.environment.get(\"apim_clientSecret\")\r",
+																	"const scope = `api://app-vwt-ip-4ps-service-orders-${pm.environment.get(\"environmentName\")}/.default`\r",
+																	"\r",
+																	"const getBearerTokenOptions = {\r",
+																	"  url:  url, \r",
+																	"  method: 'POST',\r",
+																	"  header: {\r",
+																	"    'Accept': '*/*',\r",
+																	"    'Content-Type': 'application/x-www-form-urlencoded',\r",
+																	"  },\r",
+																	"  body: {\r",
+																	"    mode: 'urlencoded',\r",
+																	"    urlencoded : [\r",
+																	"      { key: 'grant_type', value: \"client_credentials\"},\r",
+																	"      { key: 'client_id', value: clientId},\r",
+																	"      { key: 'client_secret', value: clientSecret},\r",
+																	"      { key: 'scope', value: scope}\r",
+																	"    ]\r",
+																	"  }\r",
+																	"};\r",
+																	"\r",
+																	"pm.sendRequest(getBearerTokenOptions,(error,res)=>{\r",
+																	"    pm.variables.set(\"my-fromscript-token\", res.json().access_token);\r",
+																	"});\r",
+																	""
+																],
+																"type": "text/javascript"
+															}
+														},
+														{
+															"listen": "test",
+															"script": {
+																"id": "0c3be032-9fbf-4f23-99e9-7da749911cf4",
+																"exec": [
+																	"pm.test(\"Status code is 200\", function () {\r",
+																	"  pm.response.to.have.status(200);\r",
+																	"});"
+																],
+																"type": "text/javascript"
+															}
+														}
+													],
+													"id": "eeaf2b3b-ce2c-4b66-956c-e2b85266b99a",
+													"protocolProfileBehavior": {
+														"disableBodyPruning": true
+													},
+													"request": {
+														"auth": {
+															"type": "bearer",
+															"bearer": {
+																"token": "{{my-fromscript-token}}"
+															}
+														},
+														"method": "PATCH",
+														"header": [
+															{
+																"key": "If-Match",
+																"value": "*",
+																"type": "text"
+															}
+														],
+														"body": {
+															"mode": "raw",
+															"raw": "{\r\n    \"status\": \"Cancelled\"\r\n}",
+															"options": {
+																"raw": {
+																	"language": "json"
+																}
+															}
+														},
+														"url": "{{ApimEndpoint}}/4ps-service-orders/ODataV4/Company('{{CompanyId}}')/serviceOrderVWT('{{local_createdServiceOrderNo}}')"
+													},
+													"response": []
+												},
+												{
+													"name": "Delete_WorkOrder",
+													"event": [
+														{
+															"listen": "prerequest",
+															"script": {
+																"id": "dc0ab971-4e13-48bb-81d2-1ba765d7d945",
+																"exec": [
+																	"const url = \"https://login.microsoftonline.com/be36ab0a-ee39-47de-9356-a8a501a9c832/oauth2/v2.0/token\"\r",
+																	"const clientId = pm.environment.get(\"apim_clientId\")\r",
+																	"const clientSecret = pm.environment.get(\"apim_clientSecret\")\r",
+																	"const scope = `api://app-vwt-ip-4ps-service-orders-${pm.environment.get(\"environmentName\")}/.default`\r",
+																	"\r",
+																	"const getBearerTokenOptions = {\r",
+																	"  url:  url, \r",
+																	"  method: 'POST',\r",
+																	"  header: {\r",
+																	"    'Accept': '*/*',\r",
+																	"    'Content-Type': 'application/x-www-form-urlencoded',\r",
+																	"  },\r",
+																	"  body: {\r",
+																	"    mode: 'urlencoded',\r",
+																	"    urlencoded : [\r",
+																	"      { key: 'grant_type', value: \"client_credentials\"},\r",
+																	"      { key: 'client_id', value: clientId},\r",
+																	"      { key: 'client_secret', value: clientSecret},\r",
+																	"      { key: 'scope', value: scope}\r",
+																	"    ]\r",
+																	"  }\r",
+																	"};\r",
+																	"\r",
+																	"pm.sendRequest(getBearerTokenOptions,(error,res)=>{\r",
+																	"    pm.variables.set(\"my-fromscript-token\", res.json().access_token);\r",
+																	"});"
+																],
+																"type": "text/javascript"
+															}
+														},
+														{
+															"listen": "test",
+															"script": {
+																"id": "0c3be032-9fbf-4f23-99e9-7da749911cf4",
+																"exec": [
+																	"pm.test(\"Status code is 204\", function () {\r",
+																	"  pm.response.to.have.status(204);\r",
+																	"});"
+																],
+																"type": "text/javascript"
+															}
+														}
+													],
+													"id": "00052eb7-b75d-45f1-8b2b-dd5c532a5076",
+													"protocolProfileBehavior": {
+														"disableBodyPruning": true
+													},
+													"request": {
+														"auth": {
+															"type": "bearer",
+															"bearer": {
+																"token": "{{my-fromscript-token}}"
+															}
+														},
+														"method": "DELETE",
+														"header": [],
+														"body": {
+															"mode": "raw",
+															"raw": ""
+														},
+														"url": "{{ApimEndpoint}}/4ps-service-orders/ODataV4/Company('{{CompanyId}}')/serviceOrderVWT('{{local_createdServiceOrderNo}}')"
+													},
+													"response": []
+												}
+											],
+											"id": "eeb67f03-ad04-4380-82b7-33ed2de69163"
+										}
+									],
+									"id": "776647af-fdad-4305-b3ed-73d0b353b397",
+									"event": [
+										{
+											"listen": "prerequest",
+											"script": {
+												"id": "a91fa086-0f1d-4460-8293-5e0db0ed6811",
+												"type": "text/javascript",
+												"exec": [
+													""
+												]
+											}
+										},
+										{
+											"listen": "test",
+											"script": {
+												"id": "ae37940d-d785-4c6b-bf37-f2ffd6b16900",
+												"type": "text/javascript",
+												"exec": [
+													"console.log(\"cleanup\")"
+												]
+											}
+										}
+									]
+								}
+							],
+							"id": "0f914a45-5e24-42af-8a07-5c0f30d6f4be",
+							"description": "This folder describes tests to validate that a create request was processed succesfully",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "4f135dc7-a4cb-4e55-b3ab-5ef5bca7bd6d",
+										"type": "text/javascript",
+										"exec": [
+											"var FileName = pm.variables.get(\"FileURL\") //Comming from DataSetFile",
+											"var SasToken = pm.variables.get(\"TestsBlobSaS\")",
+											"",
+											"var TestFileURL = `${FileName}?${SasToken}`",
+											"",
+											"pm.sendRequest({",
+											"    url: TestFileURL,",
+											"    method: 'GET',",
+											"}, function (err, res) {",
+											"    //BaseX64 decode",
+											"    var testFileContent = res.json();",
+											"    pm.variables.set('body', atob(testFileContent.Request));",
+											"",
+											"    // Loop Through all expected entries",
+											"    for (const [entryName, entryValue] of Object.entries(testFileContent.ExpectedEntries)) ",
+											"    {",
+											"        pm.variables.set(`Expected_${entryName}`, entryValue)",
+											"    }",
+											"",
+											"    for (const [entryName, entryValue] of Object.entries(testFileContent.Env)) ",
+											"    {",
+											"        pm.variables.set(entryName, entryValue);",
+											"    }",
+											"});"
+										]
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"id": "f65789b5-f7b1-4e68-bc66-1fe0ea1b9d93",
+										"type": "text/javascript",
+										"exec": [
+											""
+										]
+									}
+								}
+							]
+						}
+					],
+					"id": "d45396e4-2a83-4efb-b979-bb28949596c1"
+				}
+			],
+			"id": "8d97dca0-2775-4a51-8c96-0ddeb5ea685e",
+			"description": "Automation Tests of Tickets management Flow"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "6e57fdbe-3977-424c-bbeb-9bf7bf4c0d8f",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "191d9f7f-87fe-42a4-808b-7cf488109c90",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
