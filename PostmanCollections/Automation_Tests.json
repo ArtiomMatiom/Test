@@ -1899,6 +1899,24 @@
 			],
 			"id": "8d97dca0-2775-4a51-8c96-0ddeb5ea685e",
 			"description": "Automation Tests of Tickets management Flow"
+		},
+		{
+			"name": "Exeptiments with git",
+			"item": [
+				{
+					"name": "New Request",
+					"id": "e4e3584f-75c4-4b21-87c2-7d2f1b9ea9ba",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				}
+			],
+			"id": "e72b02c7-4ae4-45bb-a271-9e57e6101f5d"
 		}
 	],
 	"event": [
