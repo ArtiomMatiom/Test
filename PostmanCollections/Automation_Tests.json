@@ -1026,9 +1026,12 @@
 								{
 									"listen": "prerequest",
 									"script": {
-										"id": "4f135dc7-a4cb-4e55-b3ab-5ef5bca7bd6d",
+										"id": "61c4642b-d15b-48bd-8595-369a9983b201",
 										"type": "text/javascript",
 										"exec": [
+											"console.log(\"test\")",
+											"console.log(pm.variables.get(\"FileURL\"))",
+											"",
 											"var FileName = pm.variables.get(\"FileURL\") //Comming from DataSetFile",
 											"var SasToken = pm.variables.get(\"TestsBlobSaS\")",
 											"",
@@ -1059,7 +1062,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "f65789b5-f7b1-4e68-bc66-1fe0ea1b9d93",
+										"id": "e9ba8db9-f664-45a2-9b47-1950bcc3dcaa",
 										"type": "text/javascript",
 										"exec": [
 											""
