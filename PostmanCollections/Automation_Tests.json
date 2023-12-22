@@ -1903,6 +1903,25 @@
 			],
 			"id": "8d97dca0-2775-4a51-8c96-0ddeb5ea685e",
 			"description": "Automation Tests of Tickets management Flow"
+		},
+		{
+			"name": "test",
+			"item": [
+				{
+					"name": "New Request",
+					"id": "1b5b5e77-e268-413f-aeff-6a8ef60efaa7",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "asfs.cxom"
+					},
+					"response": []
+				}
+			],
+			"id": "5e260466-31d7-4d6f-a54b-915f0c0dd01e"
 		}
 	],
 	"event": [
