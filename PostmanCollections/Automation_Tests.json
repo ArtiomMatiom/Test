@@ -1271,6 +1271,8 @@
 															"pm.variables.set(\"Pre_Expected_Integration\", pm.variables.get(\"Expected_ServiceOrder\").integration)\r",
 															"pm.variables.set(\"Pre_Expected_OrderNoCustomer\", pm.variables.get(\"Expected_ServiceOrder\").orderNoCustomer)\r",
 															"\r",
+															"console.log(pm.variables.get(\"Expected_ServiceOrder\").orderNoCustomer)\r",
+															"\r",
 															"pm.sendRequest(options,(error,res)=>{\r",
 															"    pm.variables.set(\"my-fromscript-token\", res.json().access_token);\r",
 															"});\r",
