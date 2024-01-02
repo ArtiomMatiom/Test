@@ -1183,8 +1183,18 @@
 															"    pm.expect( pm.response.json().value.length).to.greaterThan(0)\r",
 															"})\r",
 															"\r",
+															" //From the arrray that start with Pre_Expected_OrderNoCustomer_BeforeHash find the exactly needed on\r",
+															"var serviceOrder = pm.response.json().value\r",
+															"        .find(x=>x.orderNoCustomer === pm.variables.get(\"Expected_ServiceOrder\"))\r",
+															"\r",
+															"console.log(pm.variables.get(\"Expected_ServiceOrder\"))\r",
+															"console.log(pm.response.json().value);\r",
+															"console.log(serviceOrder);\r",
+															"\r",
 															"pm.test(\"Service order should have Correct Values\", ()=>{\r",
-															"    var serviceOrder = pm.response.json().value[0];\r",
+															"   \r",
+															"    // var serviceOrder = pm.response.json().value\r",
+															"    //     .find(x=>x.orderNoCustomer ===pm.variables.get(\"Expected_ServiceOrder\"))\r",
 															"\r",
 															"    //Call 4PS to update service order\r",
 															"    pm.expect(serviceOrder.address).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").address);\r",
@@ -1223,9 +1233,8 @@
 															"    pm.expect(serviceOrder.serviceContractNo).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").serviceContractNo);\r",
 															"})\r",
 															"\r",
-															"\r",
-															"pm.variables.set(\"local_createdServiceOrderSystemId\",pm.response.json().value[0].systemId);\r",
-															"pm.variables.set(\"local_createdServiceOrderNo\",pm.response.json().value[0].no);\r",
+															"pm.variables.set(\"local_createdServiceOrderSystemId\",serviceOrder.systemId);\r",
+															"pm.variables.set(\"local_createdServiceOrderNo\",serviceOrder.no);\r",
 															"\r",
 															"\r",
 															"\r",
@@ -1303,7 +1312,7 @@
 													"raw": ""
 												},
 												"url": {
-													"raw": "{{ApimEndpoint}}/4ps-service-orders/ODataV4/Company('{{CompanyId}}')/serviceOrderVWT?$filter=integration eq '{{Pre_Expected_Integration}}' and startswith(orderNoCustomer, '20231204101001574')",
+													"raw": "{{ApimEndpoint}}/4ps-service-orders/ODataV4/Company('{{CompanyId}}')/serviceOrderVWT?$filter=integration eq '{{Pre_Expected_Integration}}' and startswith(orderNoCustomer, '{{Pre_Expected_OrderNoCustomer_BeforeHash}}')",
 													"host": [
 														"{{ApimEndpoint}}"
 													],
@@ -1316,7 +1325,7 @@
 													"query": [
 														{
 															"key": "$filter",
-															"value": "integration eq '{{Pre_Expected_Integration}}' and startswith(orderNoCustomer, '20231204101001574')"
+															"value": "integration eq '{{Pre_Expected_Integration}}' and startswith(orderNoCustomer, '{{Pre_Expected_OrderNoCustomer_BeforeHash}}')"
 														}
 													]
 												}
