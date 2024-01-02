@@ -74,7 +74,7 @@
 														}
 													}
 												},
-												"url": "{{Url_KPN_Incoming}}/Request"
+												"url": "{{Url_KPN_Incoming}}/Request432"
 											},
 											"response": []
 										}
