@@ -84,17 +84,40 @@
 										{
 											"listen": "prerequest",
 											"script": {
-												"id": "2ebb37a5-15f6-45d5-837a-291fdca17715",
+												"id": "5f2dfd0a-b047-4566-abb4-1698928f87a3",
 												"type": "text/javascript",
 												"exec": [
-													""
+													"var FileName = pm.variables.get(\"FileURL\") //Comming from DataSetFile",
+													"var SasToken = pm.variables.get(\"TestsBlobSaS\")",
+													"",
+													"var TestFileURL = `${FileName}?${SasToken}`",
+													"",
+													"pm.sendRequest({",
+													"    url: TestFileURL,",
+													"    method: 'GET',",
+													"}, function (err, res) {",
+													"    //BaseX64 decode",
+													"    var testFileContent = res.json();",
+													"    pm.variables.set('body', atob(testFileContent.Request));",
+													"",
+													"    // Loop Through all expected entries",
+													"    for (const [entryName, entryValue] of Object.entries(testFileContent.ExpectedEntries)) ",
+													"    {",
+													"        pm.variables.set(`Expected_${entryName}`, entryValue)",
+													"    }",
+													"",
+													"    for (const [entryName, entryValue] of Object.entries(testFileContent.Env)) ",
+													"    {",
+													"        pm.variables.set(entryName, entryValue);",
+													"    }",
+													"});"
 												]
 											}
 										},
 										{
 											"listen": "test",
 											"script": {
-												"id": "21e269cb-c032-46e5-be21-988ddb1411d8",
+												"id": "c8127d85-743c-40fe-b4d3-42826810b909",
 												"type": "text/javascript",
 												"exec": [
 													""
@@ -106,6 +129,158 @@
 								{
 									"name": "Assert",
 									"item": [
+										{
+											"name": "Check_ServiceOrder_Created",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"id": "d94d0687-da62-4144-8d57-5e7229c97093",
+														"exec": [
+															"pm.test(\"Status code is 200\", function () {\r",
+															"  pm.response.to.have.status(200);\r",
+															"});\r",
+															"\r",
+															"pm.test(`Service order Should Exist`, ()=>{\r",
+															"    pm.expect( pm.response.json().value.length).to.greaterThan(0)\r",
+															"})\r",
+															"\r",
+															"pm.test(\"Service order should have Correct Values\", ()=>{\r",
+															"    var serviceOrder = pm.response.json().value[0];\r",
+															"\r",
+															"    //Call 4PS to update service order\r",
+															"    pm.expect(serviceOrder.address).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").address);\r",
+															"    pm.expect(serviceOrder.city).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").city);\r",
+															"    pm.expect(serviceOrder.countryRegionCode).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").countryRegionCode);\r",
+															"    pm.expect(serviceOrder.customerOrderStatus).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").customerOrderStatus);\r",
+															"    pm.expect(serviceOrder.deliveryStatus).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").deliveryStatus);\r",
+															"    pm.expect(serviceOrder.description).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").description);\r",
+															"    pm.expect(serviceOrder.description2).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").description2);\r",
+															"    pm.expect(serviceOrder.eMail).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").eMail);\r",
+															"    pm.expect(serviceOrder.endingDateAppointment).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").endingDateAppointment);\r",
+															"    pm.expect(serviceOrder.endingTimeAppointment).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").endingTimeAppointment);\r",
+															"    pm.expect(serviceOrder.finalDeliveryDate).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").finalDeliveryDate);\r",
+															"    pm.expect(serviceOrder.finalDeliveryTime).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").finalDeliveryTime);\r",
+															"    pm.expect(serviceOrder.mobilePhoneNo).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").mobilePhoneNo);\r",
+															"    pm.expect(serviceOrder.onHold).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").onHold);\r",
+															"    pm.expect(serviceOrder.orderKind).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").orderKind);\r",
+															"    pm.expect(serviceOrder.orderType).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").orderType);\r",
+															"    pm.expect(serviceOrder.phoneNo).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").phoneNo);\r",
+															"    pm.expect(serviceOrder.planType).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").planType);\r",
+															"    pm.expect(serviceOrder.postCode).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").postCode);\r",
+															"    pm.expect(serviceOrder.startingDateAppointment).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").startingDateAppointment);\r",
+															"    pm.expect(serviceOrder.startingTimeAppointment).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").startingTimeAppointment);\r",
+															"    pm.expect(serviceOrder.appointmentBeforeDate).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").appointmentBeforeDate);\r",
+															"    //add by reinoud\r",
+															"    pm.expect(serviceOrder.name).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").name);\r",
+															"    pm.expect(serviceOrder.orderNoCustomer).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").orderNoCustomer);\r",
+															"    pm.expect(serviceOrder.status).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").status);\r",
+															"\r",
+															"    //Call 4PS to update service order with service location\r",
+															"    pm.expect(serviceOrder.serviceLocationNo).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").serviceLocationNo);\r",
+															"\r",
+															"    //Call 4PS to update service order with customer and contract information\r",
+															"    pm.expect(serviceOrder.customerNo).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").customerNo);\r",
+															"    pm.expect(serviceOrder.priority).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").priority);\r",
+															"    pm.expect(serviceOrder.serviceContractNo).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").serviceContractNo);\r",
+															"})\r",
+															"\r",
+															"\r",
+															"pm.variables.set(\"local_createdServiceOrderSystemId\",pm.response.json().value[0].systemId);\r",
+															"pm.variables.set(\"local_createdServiceOrderNo\",pm.response.json().value[0].no);\r",
+															"\r",
+															"\r",
+															"\r",
+															"\r",
+															""
+														],
+														"type": "text/javascript"
+													}
+												},
+												{
+													"listen": "prerequest",
+													"script": {
+														"id": "34838c53-0874-4dde-8a56-ca5491457f0f",
+														"exec": [
+															"const url = \"https://login.microsoftonline.com/be36ab0a-ee39-47de-9356-a8a501a9c832/oauth2/v2.0/token\"\r",
+															"const clientId = pm.environment.get(\"apim_clientId\")\r",
+															"const clientSecret = pm.environment.get(\"apim_clientSecret\")\r",
+															"\r",
+															"\r",
+															"\r",
+															"const scope = `api://app-vwt-ip-4ps-service-orders-${pm.environment.get(\"environmentName\")}/.default` \r",
+															"\r",
+															"const options = {\r",
+															"  url:  url, \r",
+															"  method: 'POST',\r",
+															"  header: {\r",
+															"    'Accept': '*/*',\r",
+															"    'Content-Type': 'application/x-www-form-urlencoded',\r",
+															"  },\r",
+															"  body: {\r",
+															"    mode: 'urlencoded',\r",
+															"    urlencoded : [\r",
+															"      { key: 'grant_type', value: \"client_credentials\"},\r",
+															"      { key: 'client_id', value: clientId},\r",
+															"      { key: 'client_secret', value: clientSecret},\r",
+															"      { key: 'scope', value: scope}\r",
+															"    ]\r",
+															"  }\r",
+															"};\r",
+															"\r",
+															"\r",
+															"//Seting variables to be used in the URL\r",
+															"pm.variables.set(\"Pre_Expected_Integration\", pm.variables.get(\"Expected_ServiceOrder\").integration)\r",
+															"pm.variables.set(\"Pre_Expected_OrderNoCustomer\", pm.variables.get(\"Expected_ServiceOrder\").orderNoCustomer)\r",
+															"\r",
+															"pm.sendRequest(options,(error,res)=>{\r",
+															"    pm.variables.set(\"my-fromscript-token\", res.json().access_token);\r",
+															"});\r",
+															"\r",
+															""
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"id": "c5d57658-1ae2-46d6-8eff-b379d10e0e51",
+											"protocolProfileBehavior": {
+												"disableBodyPruning": true
+											},
+											"request": {
+												"auth": {
+													"type": "bearer",
+													"bearer": {
+														"token": "{{my-fromscript-token}}"
+													}
+												},
+												"method": "GET",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": ""
+												},
+												"url": {
+													"raw": "{{ApimEndpoint}}/4ps-service-orders/ODataV4/Company('{{CompanyId}}')/serviceOrderVWT?$filter=integration eq '{{Pre_Expected_Integration}}' and orderNoCustomer eq '{{Pre_Expected_OrderNoCustomer}}'",
+													"host": [
+														"{{ApimEndpoint}}"
+													],
+													"path": [
+														"4ps-service-orders",
+														"ODataV4",
+														"Company('{{CompanyId}}')",
+														"serviceOrderVWT"
+													],
+													"query": [
+														{
+															"key": "$filter",
+															"value": "integration eq '{{Pre_Expected_Integration}}' and orderNoCustomer eq '{{Pre_Expected_OrderNoCustomer}}'"
+														}
+													]
+												}
+											},
+											"response": []
+										},
 										{
 											"name": "Check_WorkOrders_Created",
 											"event": [
@@ -673,158 +848,6 @@
 												}
 											},
 											"response": []
-										},
-										{
-											"name": "Check_ServiceOrder_Created",
-											"event": [
-												{
-													"listen": "test",
-													"script": {
-														"id": "d94d0687-da62-4144-8d57-5e7229c97093",
-														"exec": [
-															"pm.test(\"Status code is 200\", function () {\r",
-															"  pm.response.to.have.status(200);\r",
-															"});\r",
-															"\r",
-															"pm.test(`Service order Should Exist`, ()=>{\r",
-															"    pm.expect( pm.response.json().value.length).to.greaterThan(0)\r",
-															"})\r",
-															"\r",
-															"pm.test(\"Service order should have Correct Values\", ()=>{\r",
-															"    var serviceOrder = pm.response.json().value[0];\r",
-															"\r",
-															"    //Call 4PS to update service order\r",
-															"    pm.expect(serviceOrder.address).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").address);\r",
-															"    pm.expect(serviceOrder.city).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").city);\r",
-															"    pm.expect(serviceOrder.countryRegionCode).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").countryRegionCode);\r",
-															"    pm.expect(serviceOrder.customerOrderStatus).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").customerOrderStatus);\r",
-															"    pm.expect(serviceOrder.deliveryStatus).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").deliveryStatus);\r",
-															"    pm.expect(serviceOrder.description).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").description);\r",
-															"    pm.expect(serviceOrder.description2).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").description2);\r",
-															"    pm.expect(serviceOrder.eMail).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").eMail);\r",
-															"    pm.expect(serviceOrder.endingDateAppointment).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").endingDateAppointment);\r",
-															"    pm.expect(serviceOrder.endingTimeAppointment).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").endingTimeAppointment);\r",
-															"    pm.expect(serviceOrder.finalDeliveryDate).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").finalDeliveryDate);\r",
-															"    pm.expect(serviceOrder.finalDeliveryTime).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").finalDeliveryTime);\r",
-															"    pm.expect(serviceOrder.mobilePhoneNo).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").mobilePhoneNo);\r",
-															"    pm.expect(serviceOrder.onHold).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").onHold);\r",
-															"    pm.expect(serviceOrder.orderKind).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").orderKind);\r",
-															"    pm.expect(serviceOrder.orderType).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").orderType);\r",
-															"    pm.expect(serviceOrder.phoneNo).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").phoneNo);\r",
-															"    pm.expect(serviceOrder.planType).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").planType);\r",
-															"    pm.expect(serviceOrder.postCode).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").postCode);\r",
-															"    pm.expect(serviceOrder.startingDateAppointment).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").startingDateAppointment);\r",
-															"    pm.expect(serviceOrder.startingTimeAppointment).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").startingTimeAppointment);\r",
-															"    pm.expect(serviceOrder.appointmentBeforeDate).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").appointmentBeforeDate);\r",
-															"    //add by reinoud\r",
-															"    pm.expect(serviceOrder.name).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").name);\r",
-															"    pm.expect(serviceOrder.orderNoCustomer).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").orderNoCustomer);\r",
-															"    pm.expect(serviceOrder.status).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").status);\r",
-															"\r",
-															"    //Call 4PS to update service order with service location\r",
-															"    pm.expect(serviceOrder.serviceLocationNo).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").serviceLocationNo);\r",
-															"\r",
-															"    //Call 4PS to update service order with customer and contract information\r",
-															"    pm.expect(serviceOrder.customerNo).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").customerNo);\r",
-															"    pm.expect(serviceOrder.priority).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").priority);\r",
-															"    pm.expect(serviceOrder.serviceContractNo).to.be.eql(pm.variables.get(\"Expected_ServiceOrder\").serviceContractNo);\r",
-															"})\r",
-															"\r",
-															"\r",
-															"pm.variables.set(\"local_createdServiceOrderSystemId\",pm.response.json().value[0].systemId);\r",
-															"pm.variables.set(\"local_createdServiceOrderNo\",pm.response.json().value[0].no);\r",
-															"\r",
-															"\r",
-															"\r",
-															"\r",
-															""
-														],
-														"type": "text/javascript"
-													}
-												},
-												{
-													"listen": "prerequest",
-													"script": {
-														"id": "34838c53-0874-4dde-8a56-ca5491457f0f",
-														"exec": [
-															"const url = \"https://login.microsoftonline.com/be36ab0a-ee39-47de-9356-a8a501a9c832/oauth2/v2.0/token\"\r",
-															"const clientId = pm.environment.get(\"apim_clientId\")\r",
-															"const clientSecret = pm.environment.get(\"apim_clientSecret\")\r",
-															"\r",
-															"\r",
-															"\r",
-															"const scope = `api://app-vwt-ip-4ps-service-orders-${pm.environment.get(\"environmentName\")}/.default` \r",
-															"\r",
-															"const options = {\r",
-															"  url:  url, \r",
-															"  method: 'POST',\r",
-															"  header: {\r",
-															"    'Accept': '*/*',\r",
-															"    'Content-Type': 'application/x-www-form-urlencoded',\r",
-															"  },\r",
-															"  body: {\r",
-															"    mode: 'urlencoded',\r",
-															"    urlencoded : [\r",
-															"      { key: 'grant_type', value: \"client_credentials\"},\r",
-															"      { key: 'client_id', value: clientId},\r",
-															"      { key: 'client_secret', value: clientSecret},\r",
-															"      { key: 'scope', value: scope}\r",
-															"    ]\r",
-															"  }\r",
-															"};\r",
-															"\r",
-															"\r",
-															"//Seting variables to be used in the URL\r",
-															"pm.variables.set(\"Pre_Expected_Integration\", pm.variables.get(\"Expected_ServiceOrder\").integration)\r",
-															"pm.variables.set(\"Pre_Expected_OrderNoCustomer\", pm.variables.get(\"Expected_ServiceOrder\").orderNoCustomer)\r",
-															"\r",
-															"pm.sendRequest(options,(error,res)=>{\r",
-															"    pm.variables.set(\"my-fromscript-token\", res.json().access_token);\r",
-															"});\r",
-															"\r",
-															""
-														],
-														"type": "text/javascript"
-													}
-												}
-											],
-											"id": "c5d57658-1ae2-46d6-8eff-b379d10e0e51",
-											"protocolProfileBehavior": {
-												"disableBodyPruning": true
-											},
-											"request": {
-												"auth": {
-													"type": "bearer",
-													"bearer": {
-														"token": "{{my-fromscript-token}}"
-													}
-												},
-												"method": "GET",
-												"header": [],
-												"body": {
-													"mode": "raw",
-													"raw": ""
-												},
-												"url": {
-													"raw": "{{ApimEndpoint}}/4ps-service-orders/ODataV4/Company('{{CompanyId}}')/serviceOrderVWT?$filter=integration eq '{{Pre_Expected_Integration}}' and orderNoCustomer eq '{{Pre_Expected_OrderNoCustomer}}'",
-													"host": [
-														"{{ApimEndpoint}}"
-													],
-													"path": [
-														"4ps-service-orders",
-														"ODataV4",
-														"Company('{{CompanyId}}')",
-														"serviceOrderVWT"
-													],
-													"query": [
-														{
-															"key": "$filter",
-															"value": "integration eq '{{Pre_Expected_Integration}}' and orderNoCustomer eq '{{Pre_Expected_OrderNoCustomer}}'"
-														}
-													]
-												}
-											},
-											"response": []
 										}
 									],
 									"id": "ab2f5cfd-3a07-4b2f-b907-f356af7af1a9"
@@ -1026,13 +1049,9 @@
 								{
 									"listen": "prerequest",
 									"script": {
-										"id": "8ef84cdd-c131-4450-b717-a17864ba80db",
+										"id": "99cca6d0-4c9b-44ea-94d3-78319b1686a6",
 										"type": "text/javascript",
 										"exec": [
-											"console.log(\"test\")",
-											"console.log(pm.variables.get(\"FileURL\"))",
-											"console.log(pm.iterationData);",
-											"",
 											"var FileName = pm.variables.get(\"FileURL\") //Comming from DataSetFile",
 											"var SasToken = pm.variables.get(\"TestsBlobSaS\")",
 											"",
@@ -1063,7 +1082,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "cf330f5e-908a-4f60-a4c5-8cba73882e4a",
+										"id": "68045e9f-589a-41fc-9d08-8760a2ad4eb2",
 										"type": "text/javascript",
 										"exec": [
 											""
