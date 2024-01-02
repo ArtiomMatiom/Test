@@ -1285,7 +1285,8 @@
 											],
 											"id": "82d2b898-7b8b-4aeb-bd69-4ef13a5b17c0",
 											"protocolProfileBehavior": {
-												"disableBodyPruning": true
+												"disableBodyPruning": true,
+												"disableUrlEncoding": true
 											},
 											"request": {
 												"auth": {
@@ -1397,7 +1398,8 @@
 											],
 											"id": "65edfee4-54d7-411a-9168-2f6e96b2a868",
 											"protocolProfileBehavior": {
-												"disableBodyPruning": true
+												"disableBodyPruning": true,
+												"disableUrlEncoding": true
 											},
 											"request": {
 												"auth": {
